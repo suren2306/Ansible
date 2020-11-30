@@ -1,0 +1,15 @@
+#This script prompts for user name and add the user to sudoers file
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  vars_prompt:
+    - name: username
+      prompt: "Enter the username"
+  tasks:
+    - name: adding user to sudo privileges
+      lineinfile:
+          path: /etc/sudoers
+          line: '{{ username }} ALL=(ALL:ALL) ALL'
+          state: present

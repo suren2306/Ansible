@@ -1,0 +1,31 @@
+#While executing the playbook add -K in the end and specify the sudo password
+#Use this script to create a new user and a DB. The newly created user has full access to the newly created DB
+---
+- hosts: "localhost"
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  vars_prompt:
+    #- name: mysqlpassword
+    #  prompt: "Enter the mysql password"
+    - name: username
+      prompt: "Enter the username"
+    - name: password
+      prompt: "Enter the password"
+    - name: dbname
+      prompt: "Enter the DBname"
+  tasks:
+    - name: Creating Database
+      mysql_db:
+        name: "{{ dbname }}"
+        state: present
+    - name: Creating user and providing DB access
+      mysql_user:
+        #login_user: root
+        #login_password: "{{ mysqlpassword }}"
+        #login_password: "password"
+        #login_unix_socket: /var/lib/mysql/mysql.sock
+        name: "{{ username }}"
+        password: "{{ password }}"
+        priv: '"{{ dbname }}".*:ALL,GRANT'
+        state: present

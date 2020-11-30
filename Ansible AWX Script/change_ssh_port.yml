@@ -1,0 +1,22 @@
+#While executing the playbook add -K in the end and specify the sudo password
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  #become_user: surendar.m
+  become_method: sudo
+  tasks:
+     - name: Changing ssh port from 22 to 2222
+       lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: '#Port 22'
+            line: 'Port 2222'
+            backup: yes
+            backrefs: yes
+        #backrefs skips the changes if the regexp is not found
+        #without backref lineinfile module adds new line at the end of the file if regexp doesnt match
+
+     - name: Restart the ssh service
+       systemd:
+            name: sshd
+            state: restarted

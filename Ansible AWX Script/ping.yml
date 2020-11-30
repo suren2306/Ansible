@@ -1,0 +1,7 @@
+#This script test the reachablity of all host using ping test
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+     - name: Testing reachablity of all hosts
+       ping:

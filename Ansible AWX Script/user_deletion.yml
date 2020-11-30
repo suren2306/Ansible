@@ -1,0 +1,24 @@
+#While executing the playbook add -K in the end and specify the sudo password
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  vars:
+    remove_users:
+    - "sampleuser"
+    - "sampleuser1"
+  tasks:
+  - name: "Remove old user accounts in remove_users"
+    user:
+      name: "{{ item }}"
+      state: "absent"
+    with_items: "{{ remove_users }}"
+
+  - name: "Removing user home directory"
+    file:
+      path: "/home/{{ item }}/"
+      state: absent
+    with_items: "{{ remove_users }}"
+    tags: delete_home
+...

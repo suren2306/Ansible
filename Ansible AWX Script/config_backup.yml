@@ -1,0 +1,34 @@
+---
+- hosts: "all"
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Creating directory
+    file:
+      path: /mnt/data/backup/config_files
+      #mode: 764
+      state: directory
+  - name: Creating Configuration Files Backup
+    archive:
+      path: /etc/*
+      dest: /mnt/data/backup/config_files/etc_{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}.tgz
+      exclude_path:
+      - /etc/rc0.d
+      - /etc/rc1.d
+      - /etc/rc2.d
+      - /etc/rc3.d
+      - /etc/rc4.d
+      - /etc/rc5.d
+      - /etc/rc6.d
+      - /etc/rc.d
+      - /etc/alternatives
+  - name: Check for config files in /mnt/data/conf
+    stat: path=/mnt/data/conf
+    register: output
+    #when: output.stat.isdir is defined and output.stat.isdir
+  - name: Taking backup of config files under /mnt/data/conf
+    archive:
+      path: /mnt/data/conf
+      dest: /mnt/data/backup/config_files/mnt.data.conf_{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}.tgz
+    when: output.stat.exists

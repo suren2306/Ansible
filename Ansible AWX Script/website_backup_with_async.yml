@@ -1,0 +1,28 @@
+---
+- hosts: "all"
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+  vars_prompt:
+  - name: site
+    prompt: "Enter the website name"
+  tasks:
+  - name: Creating directory
+    file:
+      path: /mnt/data/backup/website_backup
+      #mode: 764
+      state: directory
+  - name: Creating Website Files Backup
+    archive:
+      path: /mnt/data/sites/{{ site }}
+      dest: /mnt/data/backup/website_backup/{{ site }}_{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}.tar.gz
+      format: gz
+    async: 1000
+    poll: 60
+    register: backup_status
+  - name: Check on backup progress
+    async_status:
+      jid: "{{ backup_status.ansible_job_id }}"
+    register: job_result
+    until: job_result.finished
+    retries: 20

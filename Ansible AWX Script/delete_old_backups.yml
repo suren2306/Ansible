@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Check for config backup folder
+      stat: path=/mnt/data/backup/config_files
+      register: a
+    - name: Remove config backups older than 5 days but keep minum 5 backups
+      shell: cd /mnt/data/backup/config_files && ls -1t mnt.* | tail -n +6 | xargs rm -f && ls -1t etc* | tail -n +6 | xargs rm -f
+      when: a.stat.exists
+    - name: Check for website code backup folder
+      stat: path=/mnt/data/backup/website_backup
+      register: b
+    - name: Remove website code backups older than 2 days but keep minum 2 backups
+      shell: cd /mnt/data/backup/website_backup && ls -1t | tail -n +3 | xargs rm -f
+      when: b.stat.exists
+    - name: Check for DB backup folder
+      stat: path=/mnt/data/backup/db_backup
+      register: c
+    - name: Remove DB backups older than 5 days but keep minum 5 backups
+      shell: cd /mnt/data/backup/db_backup && ls -1t | tail -n +6 | xargs rm -f
+      when: c.stat.exists

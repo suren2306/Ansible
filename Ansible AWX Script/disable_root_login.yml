@@ -1,0 +1,36 @@
+#While executing the playbook add -K in the end and specify the sudo password
+---
+- hosts: all
+  gather_facts: true
+  become: yes
+  #become_user: surendar.m
+  become_method: sudo
+  tasks:
+    - name: Disabling root access
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^#PermitRootLogin'
+        line: 'PermitRootLogin no'
+        backup: yes
+        backrefs: yes
+        #backrefs skips the changes if the regexp is not found
+        #without backref lineinfile module adds new line at the end of the file if regexp doesnt match
+      notify:
+        - restart_sshd
+
+    - name: Disabling root access which was already configured
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+        backup: yes
+        backrefs: yes
+      notify:
+        - restart_sshd
+
+  handlers:
+    - name: restart_sshd
+      service:
+        name: sshd
+        state: restarted
+        enabled: true

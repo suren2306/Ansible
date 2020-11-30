@@ -1,0 +1,36 @@
+#While executing the playbook add -K in the end and specify the sudo password
+---
+- hosts: "all"
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  vars_prompt:
+  - name: username
+    prompt: "Enter the user name"
+    private: no
+  - name: groups
+    prompt: "Enter the groups seperrated by comma"
+  - name: password
+    prompt: "Enter the password hash"
+  #vars:
+  #  users:
+  #  - username: "user1"
+  #    groups: "groupA,groupB"
+  #    password: "{{ 'newpassword' | password_hash('sha512') }}"
+      #replace newpassword with whatever password you want to set for the user
+  #  - username: "user2"
+  #    groups: "groupC"
+  #    password: "{{ 'newpassword' | password_hash('sha512') }}"
+  tasks:
+  - name: "Create user accounts"
+    user:
+      name: "{{ username }}"
+      groups: "{{ groups }}"
+      password: "{{ password }}"
+      update_password: on_create
+    #with_items: "{{ users }}"
+  #- name: "Add authorized keys"
+  #  authorized_key:
+  #    user: "{{ item.username }}"
+  #    key: "{{ lookup('file', 'ssh_keys/'+ item.username + '.key.pub') }}"
+  #  with_items: "{{ users }}"

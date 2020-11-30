@@ -1,0 +1,36 @@
+---
+#dependency package MySQL-Python needs to installed
+- hosts: "all"
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+  vars_prompt:
+  - name: username
+    prompt: "Enter mysql user name"
+    private: no
+  - name: password
+    prompt: "Enter the password"
+  - name: db
+    prompt: "Enter the DB name"
+  tasks:
+  - name: Creating directory
+    file:
+      path: /mnt/data/backup/db_backup
+      #mode: 764
+      state: directory
+  - name: Install the Python MySQLB module
+    tags: install_dependency
+    yum:
+      name: MySQL-python
+      state: present
+  - name: Creating directory
+    file:
+      path: /mnt/data/backup/config_files
+      state: directory
+  - name: Dump all databases
+    mysql_db:
+      state: dump
+      name: "{{ db }}"
+      login_user: "{{ username }}"
+      login_password: "{{ password }}"
+      target: /mnt/data/backup/db_backup/{{ db }}{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}.sql
